@@ -1,0 +1,5 @@
+{
+  "logging_enabled": true,
+  "log_level": "INFO", 
+  "log_file": "src/logs.log"
+}
