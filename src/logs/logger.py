@@ -1,19 +1,20 @@
 import json
 import logging
-import os
+from pathlib import Path
+
 
 def logger():
-    with open('src/logs/config.json', 'r', encoding='utf-8') as file:
-        cfg = json.load(file)
+    folder = Path(__file__).parent
+    cfg = json.loads((folder / 'config.json').read_text(encoding="utf-8"))
 
     if not cfg.get('logging_enabled', True):
-        logging.disable(logging.CRITICAL)
         return logging.getLogger('logs')
 
-    log_file = cfg.get('log_file', 'logs.log')
-    os.makedirs(os.path.dirname(log_file) or '.', exist_ok=True)
+    log_file = folder / cfg.get('log_file', 'logs.log')
 
     logging.basicConfig(level=cfg.get('log_level', 'INFO').upper(), 
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
                         handlers = [logging.FileHandler(log_file, encoding='utf-8'), logging.StreamHandler()], force=True)
     return logging.getLogger('logs')
+
+
