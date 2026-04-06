@@ -12,7 +12,7 @@ game_page_base_url = 'https://store.steampowered.com/app/'
 driver = webdriver.Chrome()
 
 # пока работает на тестовой выборке из первых 10 + рандом игра без русских отзывов + игра со скидкой
-for game_id in ['1065850', '848450'] + games_ids[0:10]:
+for game_id in [1065850, 848450] + games_ids[0:10]:
     game_page_url = game_page_base_url + str(game_id) + '/'
 
     driver.get(game_page_url)
@@ -58,7 +58,7 @@ for game_id in ['1065850', '848450'] + games_ids[0:10]:
     # Если для игры нет отзывов на русском
     if all_reviews.find_element(by=By.CLASS_NAME, value='title').text.lower() == 'все обзоры:':
         all_language_reviews_type = all_reviews.find_element(by=By.CLASS_NAME, value='game_review_summary').text
-        all_language_reviews_count = all_reviews.find_element(by=By.CLASS_NAME, value='app_reviews_count').text.replace('(', '').replace(')', '').replace('всего', '').replace(' ', '')
+        all_language_reviews_count = int(all_reviews.find_element(by=By.CLASS_NAME, value='app_reviews_count').text.replace('(', '').replace(')', '').replace('всего', '').replace(' ', ''))
 
         all_russian_reviews_type = None
         all_russian_reviews_count = None
@@ -66,11 +66,11 @@ for game_id in ['1065850', '848450'] + games_ids[0:10]:
         has_russian_reviews = True
         
         all_russian_reviews_type = all_reviews.find_element(by=By.CLASS_NAME, value='game_review_summary').text
-        all_russian_reviews_count = all_reviews.find_element(by=By.CLASS_NAME, value='app_reviews_count').text.replace('(', '').replace(')', '').replace('всего', '').replace(' ', '')
+        all_russian_reviews_count = int(all_reviews.find_element(by=By.CLASS_NAME, value='app_reviews_count').text.replace('(', '').replace(')', '').replace('всего', '').replace(' ', ''))
 
         all_language_reviews = reviews_div.find_element(by=By.CSS_SELECTOR, value='.review_language_breakdown .outlier_totals.global.review_box_background_secondary')
 
-        all_language_reviews_count = all_language_reviews.find_element(by=By.CLASS_NAME, value='review_summary_count').text.replace(' ', '')
+        all_language_reviews_count = int(all_language_reviews.find_element(by=By.CLASS_NAME, value='review_summary_count').text.replace(' ', ''))
         all_language_reviews_type = all_language_reviews.find_element(by=By.CLASS_NAME, value='game_review_summary').text
 
 
