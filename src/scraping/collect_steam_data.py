@@ -81,6 +81,15 @@ for game_id in selected_games_ids:
 
     sleep(0.5)
 
+    page_title = driver.title
+
+    if page_title == 'Ошибка веб-страницы':
+        log.warning(f'Игра недоступна в вашем регионе {game_page_url} | steam_id = {game_id}. game_description_snippet = None')
+
+        games_data.append({'steam_id': game_id, 'game_name': None, 'game_description_snippet': None, 'game_price': None, 'found_game_price': None, 'all_language_reviews_type': None, 'all_language_reviews_count': None, 'has_russian_reviews': None, 'all_russian_reviews_type': None, 'all_russian_reviews_count': None, 'steam_app_url': game_page_url, 'support_ru_region': False})
+
+        continue
+
     # https://brightdata.com/faqs/selenium/how-to-wait-for-page-load
     # был случай, что как-будто страница не успела загрузиться и это начальное получение имени игры упало с ошибкой, так что для надежности добавлено ожидание загрузки элемента
     try:
@@ -95,6 +104,7 @@ for game_id in selected_games_ids:
         log.warning(f'Не удалось получить описание для игры {game_page_url} | steam_id = {game_id}. game_description_snippet = None')
         game_description_snippet = None
 
+    found_game_price = True
     try:
         # ищем блок с ценой, где указано Купить Game Name
         # https://www.browserstack.com/guide/find-element-by-text-using-selenium
@@ -131,6 +141,9 @@ for game_id in selected_games_ids:
         except:
             log.warning(f'Ошибка при получения цены игры {game_page_url} | steam_id = {game_id}. game_price = None')
             game_price = None
+
+    if game_price is None:
+        found_game_price = False
 
     try:
         reviews_div = driver.find_element(by=By.CLASS_NAME, value='review_score_summaries')
@@ -169,7 +182,7 @@ for game_id in selected_games_ids:
 
 
     try:
-        games_data.append({'steam_id': game_id, 'game_name': title, 'game_description_snippet': game_description_snippet.text, 'game_price': game_price, 'all_language_reviews_type': all_language_reviews_type, 'all_language_reviews_count': all_language_reviews_count, 'has_russian_reviews': has_russian_reviews, 'all_russian_reviews_type': all_russian_reviews_type, 'all_russian_reviews_count': all_russian_reviews_count, 'steam_app_url': game_page_url})
+        games_data.append({'steam_id': game_id, 'game_name': title, 'game_description_snippet': game_description_snippet.text, 'game_price': game_price, 'found_game_price': found_game_price, 'all_language_reviews_type': all_language_reviews_type, 'all_language_reviews_count': all_language_reviews_count, 'has_russian_reviews': has_russian_reviews, 'all_russian_reviews_type': all_russian_reviews_type, 'all_russian_reviews_count': all_russian_reviews_count, 'steam_app_url': game_page_url, 'support_ru_region': True})
         finish = time.perf_counter()
         res = finish - start
         log.info(f'Получена игра {title} | {game_page_url} | steam_id = {game_id} | время выполнения: {res} сек')
