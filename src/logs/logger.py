@@ -3,15 +3,14 @@ import logging
 import os
 
 def logger():
-    base_dir = os.path.dirname(__file__)
-    with open(os.path.join(base_dir, 'config.json'), 'r', encoding='utf-8') as file:
+    with open('src/logs/config.json', 'r', encoding='utf-8') as file:
         cfg = json.load(file)
 
     if not cfg.get('logging_enabled', True):
         logging.disable(logging.CRITICAL)
         return logging.getLogger('logs')
 
-    log_file = os.path.join(base_dir,cfg.get('log_file', 'logs.log'))
+    log_file = cfg.get('log_file', 'logs.log')
     os.makedirs(os.path.dirname(log_file) or '.', exist_ok=True)
 
     logging.basicConfig(level=cfg.get('log_level', 'INFO').upper(), 

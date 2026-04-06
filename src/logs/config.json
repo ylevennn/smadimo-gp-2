@@ -1,5 +1,5 @@
 {
   "logging_enabled": true,
   "log_level": "INFO", 
-  "log_file": "logs.log"
+  "log_file": "src/logs/logs.log"
 }
