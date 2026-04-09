@@ -2,3 +2,6 @@ pandas
 requests
 selenium==4.41.0
 openpyxl
+matplotlib
+seaborn
+nltk
