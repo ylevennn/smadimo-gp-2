@@ -120,6 +120,101 @@ project/
 
 - `ACCESS_TOKEN` - получить через [запрос](https://id.twitch.tv/oauth2/token) после получения `CLIENT_ID` и `CLIENT_SECRET` через [Twitch Developer Portal](https://dev.twitch.tv/console/apps/create)
 
+## **Логирование**
+
+Настройки: `src/logs/config.json`  
+Логи: `src/logs/logs.log` 
+
+### **Формирование итогового датасета**
+
+Пайплайн:
+1. Парсинг Steam-данных (`games_data_[...].xlsx`) > объединение в `df_parsed`
+2. Маппинг Steam игр к IGDB (`igdb_steam_games_final.csv`)
+3. Подтяжка IGDB-метрик (`df_games_final.csv`, `df_popular_final.csv`, `df_web_final.csv`)
+4. Очистка/нормализация в `src/eda/clean_final_dataset.ipynb`
+5. Получение финального `data/df_final.csv`
+
+---
+### **Результаты этапов подготовки данных**
+
+В текущем репозитории используются финальные таблицы:
+
+- `data/indie_games.xlsx` — `(52781, 2)`  
+- `data/df_parsed.xlsx` — `(26853, 12)`  
+- `data/igdb_steam_games_final.csv` — `(25702, 4)`  
+- `data/df_games_final.csv` — `(25698, 8)`  
+- `data/df_popular_final.csv` — `(23734, 4)`  
+- `data/df_web_final.csv` — `(26000, 3)`  
+- `data/df_final.csv` — `(8720, 17)` — основной датасет для EDA 
+
+## **Пропуски**
+
+### Пропуски
+- `game_price`: `1801` строк (`20.65%`)
+- Во всех остальных столбцах `NaN` отсутствуют
+
+### Не NaN пропуски
+- `all_language_reviews_type` = `36` (`0.41%`)
+- `all_russian_reviews_type` = `7306` (`83.78%`)
+- `all_russian_reviews_count = 0`: `7306` строк
+- `genres = "UNDEFINED"`: `538` (`6.17%`)
+- `popularity_igdb = 0`: `2830` (`32.45%`) — значение использовано как заменитель отсутсваия метрики популярности в части наблюдений
+
+Важно: `found_game_price` полностью согласован с пропусками цены:
+- `found_game_price = 0` > `game_price` всегда пустая
+- `found_game_price = 1` > `game_price` всегда непустая
+
+## **Распределение классов**
+
+### all_language_reviews_type
+- Очень положительные — `4145`
+- Смешанные — `1824`
+- В основном положительные — `1743`
+- Крайне положительные — `590`
+- Положительные — `186`
+- В основном отрицательные — `177`
+- Недостаточно информации — `36`
+- Очень отрицательные — `10`
+- Отрицательные — `6`
+- Крайне отрицательные — `3`
+
+Вывод: сильный дисбаланс классов, доминируют положительные категории.
+
+### Бинарные признаки
+- `has_russian_reviews`:  
+  - `0` — `7306`  
+  - `1` — `1414`
+- `has_external_platform`:  
+  - `False` — `5498`  
+  - `True` — `3222`
+---
+
+## **Подробное описание данных df_final**
+
+### **Размер и структура**
+- Количество объектов: `8720`
+- Количество признаков: `17`
+
+### **Список признаков**
+
+1. `game_name` - название игры
+2. `game_description_snippet` - краткое описание
+3. `game_price` - цена в рублях
+4. `found_game_price` - удалось ли извлечь цену  
+5. `all_language_reviews_type` - категория отзывов на всех языках 
+6. `all_language_reviews_count` - количество отзывов на всех языках
+7. `has_russian_reviews` - наличие русскоязычных отзывов 
+8. `all_russian_reviews_type` - категория русскоязычных отзывов
+9. `all_russian_reviews_count` - количество русскоязычных отзывов  
+10. `first_release_date` - дата первого релиза
+11. `genres` - жанры (мульти-лейбл строка через запятую)  
+12. `total_rating` - агрегированный рейтинг
+13. `total_rating_count` - число оценок для `total_rating`  
+14. `popularity_igdb` - метрика популярности IGDB 
+15. `reviews_score` - числовой маппинг `all_language_reviews_type` (`0..9`)  
+16. `russian_reviews_score` - числовой маппинг `all_russian_reviews_type` 
+17. `has_external_platform` - есть ли внешняя площадка (`True/False`)
+
 ## Подведение итогов
 
 ### Выводы по результатам анализа
