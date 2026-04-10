@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import pandas as pd
+from bs4 import BeautifulSoup
 
 # https://thecode.media/python-timing/ - для замера времени получения игры
 import time
@@ -96,10 +97,13 @@ for game_id in selected_games_ids:
         title_element = EC.presence_of_element_located((By.ID, 'appHubAppName'))
         title = WebDriverWait(driver, 10).until(title_element).text
     except TimeoutException:
-        print('timeout')
+        log.warning(f'Не удалось получить игру {game_page_url} | steam_id = {game_id} : TimeoutException')
 
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+    
     try:
-        game_description_snippet = driver.find_element(by=By.CLASS_NAME, value='game_description_snippet')
+        game_description_snippet = soup.find(class_='game_description_snippet')
     except:
         log.warning(f'Не удалось получить описание для игры {game_page_url} | steam_id = {game_id}. game_description_snippet = None')
         game_description_snippet = None
@@ -110,11 +114,11 @@ for game_id in selected_games_ids:
         # https://www.browserstack.com/guide/find-element-by-text-using-selenium
         game_price_block_title = driver.find_element(by=By.XPATH, value=f"//*[text()='Купить {title}']")
         game_price_block = game_price_block_title.find_element(by=By.XPATH, value='..')
-        # если есть скидка, то там получаем ориг цену с другого элемента. В некоторых случаях просто .game_purchase_price.price для игры со скидкой может взять цену какого-то dlc (было при тесте на Subnautica). + надо будет преобразовать потом столбец, отделить валюту, в идеале парсить без впн под ру айпи чтобы все цены были в рублях
+        # если есть скидка, то там получаем оригинальную цену с другого элемента. В некоторых случаях просто .game_purchase_price.price для игры со скидкой может взять цену какого-то dlc (было при тесте на Subnautica).
         try:
             disicont_final_price = game_price_block.find_element(by=By.CLASS_NAME, value='discount_final_price')
 
-            # вариант ниже у меня на впн на польшу, где отдельный блок с историей цены за 30 дней и с ориг ценой в элементе normal_price (новая тема, такого никогда не было)
+            # вариант ниже, может встретиться при наличии впн, к примеру, на Польшу, где отдельный блок с историей цены за 30 дней и с ориг ценой в элементе normal_price (наверное, обновление в Steam'е, и пока нет на ru регионе - такого никогда не было)
             try:
                 game_price = game_price_block.find_element(by=By.CLASS_NAME, value='normal_price').text
             except:
@@ -148,7 +152,7 @@ for game_id in selected_games_ids:
     try:
         reviews_div = driver.find_element(by=By.CLASS_NAME, value='review_score_summaries')
 
-        # скролл к блоку с отзывами(обзорами пользователей) - хз насколько он нужен, мб раз мы за счет селениума имитируем хождение по странице, то это типо логично
+        # скролл к блоку с отзывами(обзорами пользователей) - имитация действий реального пользователя
         driver.execute_script('arguments[0].scrollIntoView(true);', reviews_div) # https://sky.pro/wiki/python/prokrutka-veb-stranitsy-v-python-s-pomoschyu-selenium-web-driver/
         
         all_reviews = reviews_div.find_element(by=By.CSS_SELECTOR, value='.review_summary_ctn.overall_summary_ctn.review_box_background .summary_text')
