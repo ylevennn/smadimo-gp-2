@@ -103,6 +103,7 @@ project/
 - `src/eda/merge_parsed_df.ipynb` - получение всех спаршенных датасетов, последовательное их склеивание и выгрузка готового `df_parsed` датасета, который далее будет обогащем при помощи API
 - `src/eda/prepare_final_merged_df.ipynb` - объединение `df_parsed` с API-таблицами (`igdb_steam_games_final.csv`, `df_games_final.csv`, `df_popular_final.csv`, `df_web_final.csv`) и формирование общего датасета
 - `src/eda/clean_final_dataset.ipynb` - очистка, нормализация признаков, обработка пропусков, формирование производных признаков (`reviews_score`, `russian_reviews_score`, `has_external_platform`) и сохранение финального файла `data/df_final.csv`
+- `src/eda/eda_and_results.ipynb` - итоговый ноутбук, в котором были визуализированы данные, выдвинуты гипотезы и сделаны бизнес-выводы
 
 ### **Используемый сервис для парсинга**
 
